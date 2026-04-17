@@ -57,10 +57,12 @@ app.use('/api/users', userRoutes);
 if (process.env.NODE_ENV === 'production') {
   const path = require('path');
   app.use(express.static(path.join(__dirname, '../frontend/dist')));
-  
-  app.get('*', (req, res, next) => {
-    if (req.originalUrl.startsWith('/api')) return next();
-    res.sendFile(path.resolve(__dirname, '../frontend', 'dist', 'index.html'));
+
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.originalUrl.startsWith('/api')) {
+      return res.sendFile(path.resolve(__dirname, '../frontend', 'dist', 'index.html'));
+    }
+    next();
   });
 }
 
@@ -73,8 +75,8 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV}`);
+  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
 });
 
 module.exports = app;
