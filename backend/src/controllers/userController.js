@@ -213,6 +213,11 @@ const deleteUser = async (req, res, next) => {
       return next(new AppError('User not found.', 404));
     }
 
+    if (user.status === 'inactive') {
+      await user.deleteOne();
+      return res.json({ success: true, message: 'User permanently removed.' });
+    }
+
     // Soft delete — deactivate
     user.status = 'inactive';
     user.updatedBy = requestingUser._id;

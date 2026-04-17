@@ -14,7 +14,11 @@ exports.loginValidation = [
 exports.createUserValidation = [
   body('name').trim().notEmpty().withMessage('Name is required').isLength({ max: 100 }).withMessage('Name too long'),
   body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('password').custom((value, { req }) => {
+    if (req.body.autoGeneratePassword) return true;
+    if (!value || value.length < 6) throw new Error('Password must be at least 6 characters');
+    return true;
+  }),
   body('role').optional().isIn(['admin', 'manager', 'user']).withMessage('Role must be admin, manager, or user'),
   body('status').optional().isIn(['active', 'inactive']).withMessage('Status must be active or inactive'),
 ];

@@ -206,14 +206,16 @@ const UserList = () => {
     }
   }, []);
 
-  const handleDeactivate = async (userId, userName) => {
-    if (!confirm(`Deactivate user "${userName}"? They will not be able to login.`)) return;
+  const handleAction = async (userId, userName, status) => {
+    const isRemove = status === 'inactive';
+    const actionText = isRemove ? 'permanently remove' : 'suspend';
+    if (!confirm(`Are you sure you want to ${actionText} user "${userName}"?`)) return;
     try {
       await usersAPI.deleteUser(userId);
-      toast.success(`${userName} deactivated.`);
+      toast.success(`User ${userName} successfully ${isRemove ? 'removed' : 'suspended'}.`);
       fetchUsers();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to deactivate user.');
+      toast.error(err.response?.data?.message || 'Failed to update user.');
     }
   };
 
@@ -313,7 +315,7 @@ const UserList = () => {
                         <button className="btn btn-ghost btn-sm" onClick={() => setEditUser(u)} title="Edit">Edit</button>
                       )}
                       {isAdmin && u._id !== currentUser._id && (
-                        <button className="btn btn-danger btn-sm" onClick={() => handleDeactivate(u._id, u.name)} title="Deactivate">
+                        <button className="btn btn-danger btn-sm" onClick={() => handleAction(u._id, u.name, u.status)} title={u.status === 'active' ? 'Suspend' : 'Remove'}>
                           {u.status === 'active' ? 'Suspend' : 'Remove'}
                         </button>
                       )}
